@@ -1,0 +1,181 @@
+---
+title: "Backyard Seed Advisor — User Manual"
+subtitle: "Wild bird seed customization tool"
+author: "Troy Altus"
+date: "2026-06"
+version: "1.0"
+format:
+  pdf:
+    documentclass: article
+    classoption: [letterpaper, 11pt]
+    geometry: [margin=0.9in]
+    toc: true
+    toc-depth: 2
+    colorlinks: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Cover
+
+| | |
+|---|---|
+| **Title** | Backyard Seed Advisor |
+| **Author** | Troy Altus |
+| **Version** | 1.0 |
+| **Date** | June 2026 |
+| **Purpose** | Interactive recommender for wild bird seed types and custom mixes |
+| **Tech** | Streamlit app + CLI (Python / pixi) |
+
+\newpage
+
+# Quick Start
+
+1. `pixi install` (first time only)
+2. `pixi run app` — opens the Streamlit interface in your browser
+3. In the sidebar: pick your region + season, check the birds you actually see at your feeders, click **Calculate recommendations**
+4. Review the ranked scores, custom mix recipe, and per-bird coverage. Download recipe.txt or the Excel report.
+
+CLI alternative:
+```bash
+pixi run cli -- --region Southeast --season Winter --birds "Northern Cardinal,American Goldfinch,Mourning Dove"
+```
+
+# Purpose and Intended Use Cases
+
+This tool helps you answer: "Given the birds visiting (or that I want to visit) my yard right now, what seed should I actually buy and how should I mix it?"
+
+**Intended users**
+- Backyard birders who want to reduce waste and attract target species
+- People who buy 20–40 lb bags and want a defensible custom blend instead of generic "wild bird" mix (which is often heavy on cheap filler)
+- Anyone curious about why certain seeds work better in certain regions or seasons
+
+**Scope**
+- US-centric (9 regions with documented multipliers)
+- Focus on 9 common seed types + the birds that use platform/tube/hopper/suet feeders
+- Static, transparent, auditable tables (no black-box model)
+
+**Out of scope (v1)**
+- Full feeder hardware recommendations (though tips are included)
+- Live eBird hotspot data or API calls
+- Non-US species or international regions
+- Hummingbird nectar, oriole jelly, mealworms, or planting for birds (future tools)
+
+**Limitations (see final section)**
+Affinities are synthesized from published studies; your specific yard, predators, cover, and neighbor feeders will dominate real results.
+
+# Launching the Streamlit App
+
+```bash
+cd /path/to/bird-seed-recommender
+pixi install
+pixi run app
+```
+
+- All inputs live in the **left sidebar**.
+- Main panel updates instantly on recalculation.
+- Downloads (recipe, CSV, Excel) write to the local `output/` folder and offer browser download buttons.
+- The Help expander at the bottom contains the same practical advice that is in this manual.
+
+The app is deliberately client-side only after the pixi environment is installed — no data leaves your machine.
+
+# Running the CLI Script
+
+The CLI is useful for scripting, notes, or when you don't want to open a browser.
+
+```bash
+pixi run cli -- --help
+```
+
+Example:
+```bash
+pixi run cli -- --region "Mountain West" --season Winter \
+  --birds "Northern Cardinal,Dark-eyed Junco,Downy Woodpecker" \
+  --out-mix my-winter-mix.txt --out-xlsx winter-report.xlsx
+```
+
+Flags:
+- `--region` (required choice from the 9 supported)
+- `--season`
+- `--birds` (comma list; names must match the internal list exactly for credit)
+- `--out-*` for artifacts
+- `--json` for machine consumption
+
+Exit code is 0 on success. Unknown bird names are warned on stderr but do not fail the run.
+
+# Using the Exports
+
+Three artifacts are always available from the app (and via CLI flags):
+
+1. **recipe.txt** — plain text you can print or paste into notes. Contains the proportional mix, top singles, and any region/season notes.
+2. **seed_scores.csv** — full table with match %, multipliers, "why" text, and tips. Easy to sort/filter in a spreadsheet.
+3. **bird_seed_recommendation.xlsx** — two formatted sheets:
+   - Recipe (human summary + % breakdown)
+   - Scores (the detailed table with wrapped tips)
+
+The Excel uses openpyxl styling (header fill, column widths) so it is immediately usable for shopping or sharing with a partner who prefers spreadsheets.
+
+`output/` is git-ignored; committed example files are fine for demos.
+
+# UI Walkthrough
+
+## Sidebar Controls
+
+**Time of year** — Season dropdown. Defaults to the real calendar month mapped to Winter/Spring/Summer/Fall. Changes suet and high-fat seed emphasis.
+
+**Region** — 9 choices + National. The biggest effect is on milo (highly valued in Southwest/Plains, often filler elsewhere) and secondary effects on safflower/cracked corn.
+
+**Birds you've seen recently** — Grouped checkboxes + free-text additional field. The groups are purely for UI organization; the engine treats every selected bird equally (weight = 1.0). Adding a bird that loves nyjer will move nyjer up the rankings even if everything else stays the same.
+
+## Main Panel
+
+- Three hero metrics at top (top seed, best single addition, fraction of your birds "strongly matched" by the top recommendations).
+- Horizontal bar chart of all 9 seeds (color coded: blue ≥70, orange 40–69, gray <40).
+- Custom mix recipe table (the % weights the engine suggests).
+- Coverage pie + per-bird detail expander (shows the single best seed for each of your birds under the current region/season multipliers, plus whether that seed made the top 3).
+- Download buttons (always write local files then offer download).
+- Notes/warnings generated by simple rules (e.g. "milo is often ignored in your region").
+- Help expander (static practical guidance).
+
+# Interpreting Outputs
+
+**Match %** — Relative score after affinity × regional multiplier × seasonal multiplier, then normalized so the best seed for your exact inputs = 100. Not an absolute "X% of birds will eat this."
+
+**Recipe %** — After dropping seeds that contribute <5% under your inputs, the remaining are renormalized to 100. Use as a starting point for a single hopper; many people still prefer offering the top 2–3 as separate pure seeds in appropriate feeder styles.
+
+**"Strongly matched"** — A bird is considered covered if its single best seed (under current multipliers) is one of the overall top 3 or has a raw adjusted score ≥60. This is a heuristic to surface when you might be missing a key food for a favorite visitor.
+
+**Why the numbers move**
+- Add a goldfinch → nyjer and hearts jump.
+- Switch to Southwest in winter → milo and cracked corn rise.
+- Winter anywhere → suet and peanuts get a big boost.
+
+# Data Input Requirements
+
+| Input | Format / Values | Notes |
+|-------|------------------|-------|
+| Region | One of 9 listed + National | "National" is the safe default when you don't know or have mixed visitors |
+| Season | Winter / Spring / Summer / Fall | Affects fat emphasis and insect-vs-seed tradeoffs |
+| Birds | Exact common names from the internal list (checkboxes or comma text) | Unknown names are silently ignored for scoring but warned in CLI |
+| (optional) Zip / city | Free text only | Currently used for your own notes; not parsed or sent anywhere |
+
+All data is static. There is no "upload sightings" that phones home.
+
+# Known Limitations and Edge Cases
+
+- **Yard reality dominates tables.** If you have a cat, no cover, or the neighbor has a 50 lb sunflower feeder, the numbers will be optimistic or pessimistic accordingly.
+- **Mourning doves, starlings, grackles, and cowbirds** love millet and cracked corn. If your goal is "songbirds only," you may want to de-emphasize those two even when the scores look good.
+- **Regional multipliers are coarse.** A single "Southwest" bucket does not capture the difference between Sonoran desert and high Colorado plateau.
+- **No suet in summer** is a guideline, not a rule. Some people run suet year-round in shade; the tool just applies a lower multiplier.
+- **"Additional birds" text field** does exact string match only. Spelling or "Northern Cardinal (male)" will not count.
+- **eBird exports** are not yet auto-parsed in v1 (you can copy-paste species names manually).
+- **Hummingbirds, orioles, bluebirds, and insect specialists** are intentionally out of scope for a seed tool.
+- **Commercial blend matching** is approximate (we don't have lab assays of every bag on the shelf).
+
+The data tables live in `src/data.py` with source citations in the docstring. If you have better local observation data or new published studies, the structure is deliberately easy to edit.
+
+---
+
+*Manual version 1.0 — generated alongside the tool. Update when the scoring tables or UI change materially.*

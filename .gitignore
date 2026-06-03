@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+bin/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+__pypackages__/
+
+# Pixi / env
+.pixi/
+pixi.lock
+
+# Project
+.env
+*.pkl
+*.joblib
+output/
+.quarto/
+docs/.quarto/
+**/*.quarto_ipynb
+*.quarto_ipynb_*
+
+# OS / editors
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.log
+
+# Netlify (if ever used for a landing page)
+.netlify/
