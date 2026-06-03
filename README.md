@@ -6,6 +6,10 @@ A simple, private, client-side tool. No accounts, no uploads, no cloud calls for
 
 ---
 
+## Live App
+
+(Deploy via Streamlit Cloud after push: connect the repo, select `app.py`. Example URL once deployed: https://bird-seed-recommender-XXXX.streamlit.app — replace XXXX with your actual slug. Repo: https://github.com/altustd/bird-seed-recommender )
+
 ## Run Locally
 
 ```bash
