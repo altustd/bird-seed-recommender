@@ -8,7 +8,24 @@ A simple, private, client-side tool. No accounts, no uploads, no cloud calls for
 
 ## Live App
 
-(Deploy via Streamlit Cloud after push: connect the repo, select `app.py`. Example URL once deployed: https://bird-seed-recommender-XXXX.streamlit.app — replace XXXX with your actual slug. Repo: https://github.com/altustd/bird-seed-recommender )
+Once deployed, the interactive version lives at a URL like:
+
+https://bird-seed-recommender-XXXX.streamlit.app
+
+### Deploy steps (one time)
+1. Push your code (already done for the scaffold).
+2. Go to https://share.streamlit.io (Streamlit Community Cloud) and sign in with the GitHub account that owns the altustd org/repo.
+3. Click **New app** (or Deploy an app).
+4. Choose "I have a GitHub repo" / connect the `altustd/bird-seed-recommender` repository.
+5. Main branch, file: `app.py`.
+6. (Optional) Set a custom subdomain/slug if available.
+7. Deploy. The first build will pip install from `requirements.txt` (we added it for cloud compatibility; pixi.toml is for local `pixi run app` with the full conda env).
+
+The app will auto-redeploy on future `git push` to main.
+
+Repo: https://github.com/altustd/bird-seed-recommender
+
+After deploy, tell the AI the exact URL so the website cards and docs can be updated from the XXXX placeholder.
 
 ## Run Locally
 
