@@ -10,7 +10,7 @@ A simple, private, client-side tool. No accounts, no uploads, no cloud calls for
 
 Once deployed, the interactive version lives at a URL like:
 
-https://bird-seed-recommender-XXXX.streamlit.app
+https://bird-seed-recommender-vjfkxeoej5axze5seyh3cb.streamlit.app/
 
 ### Deploy steps (one time)
 1. Push your code (already done for the scaffold).
